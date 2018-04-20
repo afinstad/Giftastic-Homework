@@ -1,46 +1,83 @@
-// Before you can make any part of our site work, you need to create an array of strings, each one related to a topic that interests you. Save it to a variable called topics.
-// Initial array
+var topics = ["Doug Funny", "Recess", "Pepper Ann", "Rugrats"];
 
-var topics = ["Doug Funny", "Pepper Ann", "Rugrats", "Recess"];
+// displayMovieInfo function re-renders the HTML to display the appropriate content
+function displayCartoonInfo() {
+  var cartoon = $(this).attr("data-name");
+  var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+  cartoon + "&api_key=ePDSE2y9cv9VEc9YPNH3YTNY8VkKotHx";
 
-// Event listener for all button elements
-$("button").on("click", function () {
-    // In this case, the "this" keyword refers to the button that was clicked
-    var cartoon = $(this).attr("data-cartoon");
+  // Creating an AJAX call for the specific movie button being clicked
+  $.ajax({
+    url: queryURL,
+    method: "GET"
+  }).then(function(response) {
 
-    var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
-        topics + "&api_key=ePDSE2y9cv9VEc9YPNH3YTNY8VkKotHx";
+    // Creating a div to hold the movie
+    var gifDiv = $("<div class='gif'>");
 
-        $.ajax({
-            url: queryURL,
-            method: "GET"
-        })
+    // Storing the rating data
+    var rating = response.Rated;
 
-        .then(function (response) {
-            console.log(queryURL);
-            console.log(response);
-            // Storing an array of results in the results variable
-            var results = response.data;
-            // Try using a loop that appends a button for each string in the array.
-            // Looping through the array of characters 
-            for (var i = 0; i < results.length; i++) {
-                // Creating and storing a div tag
-                var gifDiv = $("<div>");
+    // Creating an element to have the rating displayed
+    var rateDisplay = $("<p>").text("Rating: " + rating);
 
-                // Creating a paragraph tag with the result item's rating
-                var p = $("<p>").text("Rating: " + results[i].rating);
+    // Displaying the rating
+    gifDiv.append(rateDisplay);
 
-                // Creating and storing an image tag
-                var gifImage = $("<img>");
-                // Setting the src attribute of the image to a property pulled off the result item
-                gifImage.attr("src", results[i].images.fixed_height.url);
 
-                // Appending the paragraph and image tag to the animalDiv
-                gifDiv.append(p);
-                gifDiv.append(gifImage);
+    // Retrieving the URL for the image
+    var imgURL = response.Poster;
 
-                // Prependng the animalDiv to the HTML page in the "#gifs-appear-here" div
-                $("#gifs-appear-here").prepend(gifDiv);
-            }
-        });
+    // Creating an element to hold the image
+    var image = $("<img>").attr("src", imgURL);
+
+    // Appending the image
+    gifDiv.append(image);
+
+    // Putting the entire movie above the previous movies
+    $("#cartoon-view").prepend(gifDiv);
+  });
+
+}
+
+// Function for displaying movie data
+function renderButtons() {
+
+  // Deleting the movies prior to adding new movies
+  // (this is necessary otherwise you will have repeat buttons)
+  $("#buttons-view").empty();
+
+  // Looping through the array of movies
+  for (var i = 0; i < topics.length; i++) {
+
+    
+    var a = $("<button>");
+    // Adding a class of movie-btn to our button
+    a.addClass("cartoon-btn");
+    // Adding a data-attribute
+    a.attr("data-name", topics[i]);
+    // Providing the initial button text
+    a.text(topics[i]);
+    // Adding the button to the buttons-view div
+    $("#buttons-view").append(a);
+  }
+}
+
+// This function handles events where a movie button is clicked
+$("#add-cartoon").on("click", function(event) {
+  event.preventDefault();
+  // This line grabs the input from the textbox
+  var cartoon = $("#cartoon-input").val().trim();
+
+  // Adding movie from the textbox to our array
+  topics.push(cartoon);
+
+  // Calling renderButtons which handles the processing of our movie array
+  renderButtons();
 });
+
+// Adding a click event listener to all elements with a class of "movie-btn"
+$(document).on("click", ".cartoon-btn", displayCartoonInfo);
+
+// Calling the renderButtons function to display the intial buttons
+renderButtons();
