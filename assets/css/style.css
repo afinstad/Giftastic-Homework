@@ -1,4 +1,8 @@
 body {
+    text-align: center; 
+    background-color: #A3E4D7;
+}
 
-    text-align: center;
+.buttons-view {
+    padding: 8px
 }
